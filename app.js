@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 
 const userRoutes = require('./routes/userRoutes');
+const sensorRoutes =require('./routes/sensorRoutes');
 
 const app = express();
 
@@ -13,5 +14,6 @@ app.use(cookieParser());
 app.use(cors());
 
 app.use('/', userRoutes);
+app.use('/', sensorRoutes);
 
 module.exports = app;
