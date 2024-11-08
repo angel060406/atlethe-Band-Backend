@@ -4,8 +4,11 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 
+// Inicializar el cliente MQTT
+require('./utils/mqttClient');
+
 const userRoutes = require('./routes/userRoutes');
-// const sensorRoutes =require('./routes/sensorRoutes');
+const sensorRoutes = require('./routes/sensorRoutes');
 
 const app = express();
 
@@ -16,11 +19,7 @@ app.use(cors({
     credentials: true
 }));
 
-app.use(express.json());
-app.use(cookieParser());
-app.use(cors());
-
 app.use('/', userRoutes);
-//app.use('/', sensorRoutes);
+app.use('/sensor', sensorRoutes);
 
 module.exports = app;
