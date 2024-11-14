@@ -5,9 +5,9 @@ const jwt = require('jsonwebtoken');
 // Registrar un nuevo usuario
 exports.registerUser = async (req, res) => {
     try {
-        const { firstname, lastname, email, password } = req.body;
+        const { name, email, password } = req.body;
 
-        if (!(firstname && lastname && email && password)) {
+        if (!(name && email && password)) {
             return res.status(400).send('Todos los campos son obligatorios');
         }
 
@@ -18,8 +18,7 @@ exports.registerUser = async (req, res) => {
 
         const myEncpassword = await bcrypt.hash(password, 10);
         const user = await User.create({
-            firstname,
-            lastname,
+            name,
             email,
             password: myEncpassword
         });
@@ -81,7 +80,7 @@ exports.loginUser = async (req, res) => {
 };
 
 // Obtener todos los usuarios
-exports.getAllUsers = async (req, res) => {
+exports.getAllUsers = async (_, res) => {
     try {
         const users = await User.find();
         res.status(200).json(users);
@@ -92,6 +91,6 @@ exports.getAllUsers = async (req, res) => {
 };
 
 // Dashboard protegido
-exports.dashboard = (req, res) => {
+exports.dashboard = (_, res) => {
     res.send('Bienvenido al dashboard');
 };
