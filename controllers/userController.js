@@ -79,17 +79,6 @@ exports.loginUser = async (req, res) => {
     }
 };
 
-// Obtener todos los usuarios
-exports.getAllUsers = async (_, res) => {
-    try {
-        const users = await User.find();
-        res.status(200).json(users);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send("Error al obtener los usuarios");
-    }
-};
-
 // Dashboard protegido
 exports.dashboard = (_, res) => {
     res.send('Bienvenido al dashboard');
