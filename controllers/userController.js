@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const Activity = require('../models/activity');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -79,7 +80,39 @@ exports.loginUser = async (req, res) => {
     }
 };
 
-// Dashboard protegido
-exports.dashboard = (_, res) => {
-    res.send('Bienvenido al dashboard');
+// Cierre de sesión de usuario
+exports.logoutUser = async (_, res) => {
+    try {
+        res.clearCookie('token', { path: '/' }); // Limpia la cookie 'token'
+        res.status(200).json({ success: true, message: 'Sesión cerrada exitosamente' });
+    } catch (error) {
+        console.error('Error al cerrar sesión:', error);
+        res.status(500).json({ success: false, message: 'Error interno del servidor' });
+    }
+};
+
+// Devuelve los datos del usuario autenticado
+exports.getProfile = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const user = await User.findById(userId).select('name email profilePicture');
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+        }
+        res.status(200).json({ success: true, data: user });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Error interno del servidor' });
+    }
+};
+
+exports.getActivities = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const activities = await Activity.find({ userId }).sort({ date: -1 }).limit(10);
+        res.status(200).json({ success: true, activities });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Error interno del servidor' });
+    }
 };
