@@ -95,7 +95,7 @@ exports.logout = async (_, res) => {
 exports.getProfile = async (req, res) => {
     try {
         const userId = req.user.id;
-        const user = await User.findById(userId).select('name email profilePicture');
+        const user = await User.findById(userId).select('name email');
         if (!user) {
             return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
         }
@@ -106,6 +106,7 @@ exports.getProfile = async (req, res) => {
     }
 };
 
+// Devuelve las actividades realizadas por el usuario autenticado
 exports.getActivities = async (req, res) => {
     try {
         const userId = req.user.id;

@@ -5,7 +5,8 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 
 // Inicializar el cliente MQTT
-require('./utils/mqttClient');
+// Queda comentado para centrarse en las pruebas de userController
+//require('./utils/mqttClient');
 
 const userRoutes = require('./routes/userRoutes');
 const sensorRoutes = require('./routes/sensorRoutes');
