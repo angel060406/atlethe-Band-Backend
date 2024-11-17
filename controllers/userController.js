@@ -81,7 +81,7 @@ exports.loginUser = async (req, res) => {
 };
 
 // Cierre de sesión de usuario
-exports.logoutUser = async (_, res) => {
+exports.logout = async (_, res) => {
     try {
         res.clearCookie('token', { path: '/' }); // Limpia la cookie 'token'
         res.status(200).json({ success: true, message: 'Sesión cerrada exitosamente' });
