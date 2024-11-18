@@ -61,24 +61,23 @@ exports.loginUser = async (req, res) => {
             { expiresIn: '1h' }
         );
 
-        user.token = token;
-        user.password = undefined;
-
         const options = {
-            expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-            httpOnly: true
+            expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 3 días
+            httpOnly: true,
         };
 
-        return res.status(200).cookie('token', token, options).json({
+        res.cookie('token', token, options);
+
+        res.status(200).json({
             success: true,
-            token,
-            user
+            user: { name: user.name, email: user.email },
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         res.status(500).send('Error interno del servidor');
     }
 };
+
 
 // Cierre de sesión de usuario
 exports.logout = async (_, res) => {
@@ -94,17 +93,20 @@ exports.logout = async (_, res) => {
 // Devuelve los datos del usuario autenticado
 exports.getProfile = async (req, res) => {
     try {
-        const userId = req.user.id;
-        const user = await User.findById(userId).select('name email');
-        if (!user) {
-            return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
-        }
-        res.status(200).json({ success: true, data: user });
+      const userId = req.user.id;
+      const user = await User.findById(userId).select('name email');
+  
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+      }
+  
+      res.status(200).json({ success: true, data: user });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Error interno del servidor' });
+      console.error('Error al obtener el perfil:', error.message);
+      res.status(500).json({ success: false, message: 'Error interno del servidor' });
     }
-};
+  };
+  
 
 // Devuelve las actividades realizadas por el usuario autenticado
 exports.getActivities = async (req, res) => {
