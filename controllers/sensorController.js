@@ -1,6 +1,6 @@
 const Sensor = require('../models/sensor');
 
-// Registrar una nueva lectura desde la API (opcional, para otras rutas)
+// Registrar una nueva lectura desde la API (para pruebas)
 exports.registerRead = async (req, res) => {
     try {
         const { sensorType, value } = req.body;
@@ -31,13 +31,23 @@ exports.getAllReadings = async (_, res) => {
 // Procesar datos del sensor recibidos por MQTT y mostrar en consola
 exports.processSensorData = (data) => {
     try {
-        // Extraer datos del mensaje JSON recibido
-        const { "temperatura del corporal": objectTemp, "temperantura ambiente": ambientTemp } = data;
+        console.log('Procesando datos del sensor:');
+        console.log('Datos recibidos:', data);
 
-        // Mostrar las lecturas en consola
-        console.log('Lectura recibida:');
-        console.log('Temperatura del corporal:', objectTemp);
-        console.log('Temperatura ambiente:', ambientTemp);
+        // Extraer datos del mensaje JSON recibido
+        const { temp_corp, ambient_temp } = data;
+
+        if (temp_corp !== undefined) {
+            console.log('Temperatura corporal recibida:', temp_corp);
+        } else {
+            console.log('Temperatura corporal no incluida en los datos.');
+        }
+
+        if (ambient_temp !== undefined) {
+            console.log('Temperatura ambiente recibida:', ambient_temp);
+        } else {
+            console.log('Temperatura ambiente no incluida en los datos.');
+        }
     } catch (error) {
         console.error('Error al procesar la lectura del sensor:', error);
     }
