@@ -52,3 +52,13 @@ exports.processSensorData = (data) => {
         console.error('Error al procesar la lectura del sensor:', error);
     }
 };
+
+// Registrar datos desde MQTT
+exports.saveSensorData = async (sensorType, value) => {
+    try {
+        const sensor = await Sensor.create({ sensorType, value });
+        console.log(`Lectura guardada en la base de datos: ${sensor}`);
+    } catch (error) {
+        console.error('Error al guardar datos del sensor:', error);
+    }
+};

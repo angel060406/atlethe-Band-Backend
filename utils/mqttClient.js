@@ -1,5 +1,6 @@
 const mqtt = require('mqtt');
 const WebSocket = require('ws');
+const { saveSensorData } = require('../controllers/sensorController');
 
 const brokerUrl = 'mqtt://broker.emqx.io';
 
@@ -31,7 +32,7 @@ client.on('connect', () => {
     });
 });
 
-client.on('message', (topic, message) => {
+client.on('message', async (topic, message) => {
     try {
         const rawMessage = message.toString();
         console.log(`Mensaje recibido en ${topic}: ${rawMessage}`);
@@ -44,29 +45,42 @@ client.on('message', (topic, message) => {
         // Obtener la instancia de WebSocket
         const wss = require('../app').get('wss');
 
-        // Enviar datos por WebSocket según el tema
+        // Procesar mensajes según el tema
         if (topic === topics.temperatura) {
-            console.log('Enviando temperatura corporal por WebSocket:', data.temp_corp);
-            broadcast(wss, { type: 'temperatura', data: data.temp_corp });
+            const tempCorp = data.temp_corp;
+            console.log('Enviando temperatura corporal por WebSocket:', tempCorp);
+
+            // Guardar en la base de datos
+            await saveSensorData('temperatura', tempCorp);
+
+            broadcast(wss, { type: 'temperatura', data: tempCorp });
         } else if (topic === topics.giroscopio) {
             console.log('Procesando datos del giroscopio:', data);
 
-            // Aquí agregamos la lógica para determinar si el usuario está encorvado
             const isEncorvado = checkPosture(data.aceleracion);
+            const postura = isEncorvado ? 'encorvado' : 'correcta';
 
-            if (isEncorvado) {
-                console.log('El usuario está encorvado');
-                broadcast(wss, { type: 'postura', data: 'encorvado' });
-            } else {
-                console.log('El usuario tiene una postura correcta');
-                broadcast(wss, { type: 'postura', data: 'correcta' });
-            }
+            // Guardar estado de la postura en la base de datos
+            await saveSensorData('giroscopio', postura === 'encorvado' ? 1 : 0);
+
+            console.log(`Postura detectada: ${postura}`);
+            broadcast(wss, { type: 'postura', data: postura });
         } else if (topic === topics.gps) {
             console.log('Enviando datos GPS:', data);
+
+            // Guardar coordenadas GPS como un string en la base de datos
+            const gpsData = `${data.latitud},${data.longitud}`;
+            await saveSensorData('gps', gpsData);
+
             broadcast(wss, { type: 'gps', data });
         } else if (topic === topics.ritmoCardiaco) {
-            console.log('Enviando ritmo cardiaco:', data);
-            broadcast(wss, { type: 'ritmoCardiaco', data });
+            const ritmo = data.ritmo;
+            console.log('Enviando ritmo cardiaco:', ritmo);
+
+            // Guardar ritmo cardiaco en la base de datos
+            await saveSensorData('ritmoCardiaco', ritmo);
+
+            broadcast(wss, { type: 'ritmoCardiaco', data: ritmo });
         }
     } catch (error) {
         console.error('Error al procesar el mensaje JSON:', error);
