@@ -49,8 +49,18 @@ client.on('message', (topic, message) => {
             console.log('Enviando temperatura corporal por WebSocket:', data.temp_corp);
             broadcast(wss, { type: 'temperatura', data: data.temp_corp });
         } else if (topic === topics.giroscopio) {
-            console.log('Enviando datos del giroscopio:', data);
-            broadcast(wss, { type: 'giroscopio', data });
+            console.log('Procesando datos del giroscopio:', data);
+
+            // Aquí agregamos la lógica para determinar si el usuario está encorvado
+            const isEncorvado = checkPosture(data.aceleracion);
+
+            if (isEncorvado) {
+                console.log('El usuario está encorvado');
+                broadcast(wss, { type: 'postura', data: 'encorvado' });
+            } else {
+                console.log('El usuario tiene una postura correcta');
+                broadcast(wss, { type: 'postura', data: 'correcta' });
+            }
         } else if (topic === topics.gps) {
             console.log('Enviando datos GPS:', data);
             broadcast(wss, { type: 'gps', data });
@@ -78,6 +88,31 @@ function broadcast(wss, message) {
             client.send(JSON.stringify(message));
         }
     });
+}
+
+// Función para determinar si el usuario está encorvado
+function checkPosture(aceleracion) {
+    const posturaCorrecta = {
+        x: 2,
+        y: 9,
+        z: -3,
+    };
+
+    const rangoAceptable = {
+        x: 2, // ±2 en la dirección x
+        y: 2, // ±2 en la dirección y
+        z: 2, // ±2 en la dirección z
+    };
+
+    const dentroDeRango = (valor, objetivo, rango) =>
+        Math.abs(valor - objetivo) <= rango;
+
+    const esCorrecta =
+        dentroDeRango(aceleracion.x, posturaCorrecta.x, rangoAceptable.x) &&
+        dentroDeRango(aceleracion.y, posturaCorrecta.y, rangoAceptable.y) &&
+        dentroDeRango(aceleracion.z, posturaCorrecta.z, rangoAceptable.z);
+
+    return !esCorrecta; // Devuelve true si no está en rango (encorvado)
 }
 
 module.exports = client;
