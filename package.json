@@ -8,6 +8,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.7.2",
     "mqtt": "^5.10.1",
+    "pm2": "^5.4.3",
     "ws": "^8.18.0"
   },
   "name": "atlethe-band-backend",
