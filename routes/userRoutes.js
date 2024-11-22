@@ -10,8 +10,8 @@ router.post('/register', registerUser);
 router.post('/login', loginUser);
 router.post('/logout', auth, logout);
 router.get('/profile', auth, getProfile);
-router.post('/activities', auth, registerActivity);
-router.get('/activities', auth, getActivities);
+router.post('/activities', registerActivity);
+router.get('/activities', getActivities);
 router.get('/validateToken', auth, (req, res) => {
     res.status(200).json({ success: true, user: req.user });
 });

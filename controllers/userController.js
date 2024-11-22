@@ -107,14 +107,16 @@ exports.getProfile = async (req, res) => {
     }
   };
   
-
-// Devuelve las actividades realizadas por el usuario autenticado
+// Devuelve todas las actividades
 exports.getActivities = async (req, res) => {
     try {
-      const userId = req.user.id;
-      const activities = await Activity.find({ userId })
+      const activities = await Activity.find()
         .sort({ date: -1 }) // Ordena por fecha descendente
         .limit(10); // Limita a las últimas 10 actividades
+  
+      if (activities.length === 0) {
+        return res.status(200).json({ success: true, activities: [] });
+      }
   
       res.status(200).json({ success: true, activities });
     } catch (error) {
@@ -123,7 +125,6 @@ exports.getActivities = async (req, res) => {
     }
   };
   
-
 // Registrar una actividad manualmente
 exports.registerActivity = async (req, res) => {
     try {
