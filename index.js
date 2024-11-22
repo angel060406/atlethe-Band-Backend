@@ -11,7 +11,14 @@ app.set('wss', wss);
 
 wss.on('connection', (ws) => {
     console.log('Cliente conectado a WebSocket');
-    ws.on('close', () => console.log('Cliente desconectado de WebSocket'));
+
+    ws.on('close', () => {
+        console.log('Cliente desconectado de WebSocket');
+    });
+
+    ws.on('error', (error) => {
+        console.error('Error en WebSocket:', error);
+    });
 });
 
 const PORT = process.env.PORT || 3000;

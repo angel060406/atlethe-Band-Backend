@@ -1,5 +1,4 @@
 const mqtt = require('mqtt');
-const WebSocket = require('ws');
 const { saveSensorData } = require('../controllers/sensorController');
 
 const brokerUrl = 'mqtt://broker.emqx.io';
@@ -98,7 +97,7 @@ client.on('error', (error) => {
 // Función para enviar datos a todos los clientes conectados
 function broadcast(wss, message) {
     wss.clients.forEach(client => {
-        if (client.readyState === WebSocket.OPEN) {
+        if (client.readyState === client.OPEN) {
             client.send(JSON.stringify(message));
         }
     });
