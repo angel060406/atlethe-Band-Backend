@@ -23,9 +23,9 @@ client.on('connect', () => {
     Object.values(topics).forEach(topic => {
         client.subscribe(topic, (err) => {
             if (err) {
-                console.error(`Error al suscribirse al tema ${topic}:`, err);
+                console.error(` Error al suscribirse al tema ${topic}:`, err);
             } else {
-                console.log(`Suscrito al tema: ${topic}`);
+                console.log(` Suscrito al tema: ${topic}`);
             }
         });
     });
@@ -68,7 +68,7 @@ client.on('message', async (topic, message) => {
             console.log('Enviando datos GPS:', data);
 
             // Guardar coordenadas GPS como un string en la base de datos
-            const gpsData = `${data.latitud},${data.longitud}`;
+            const gpsData = ` ${data.latitud},${data.longitud}`;
             await saveSensorData('gps', gpsData);
 
             broadcast(wss, { type: 'gps', data });
