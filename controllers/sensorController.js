@@ -12,7 +12,7 @@ exports.registerRead = async (req, res) => {
 
         res.status(201).json(sensor);
     } catch (error) {
-        console.log(error);
+        console.error(error);
         res.status(500).send('Error interno del servidor');
     }
 };
@@ -20,7 +20,7 @@ exports.registerRead = async (req, res) => {
 // Obtener todas las lecturas (opcional, para otras rutas)
 exports.getAllReadings = async (_, res) => {
     try {
-        const sensors = await Sensor.find();
+        const sensors = await Sensor.find().sort({ timestamp: -1 });
         res.status(200).json(sensors);
     } catch (error) {
         console.error(error);
@@ -54,9 +54,9 @@ exports.processSensorData = (data) => {
 };
 
 // Registrar datos desde MQTT
-exports.saveSensorData = async (sensorType, value) => {
+exports.saveSensorData = async (sensorType, data) => {
     try {
-        const sensor = await Sensor.create({ sensorType, value });
+        const sensor = await Sensor.create({ sensorType, value: data });
         console.log(`Lectura guardada en la base de datos: ${sensor}`);
     } catch (error) {
         console.error('Error al guardar datos del sensor:', error);

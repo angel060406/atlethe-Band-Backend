@@ -3,12 +3,16 @@ const mongoose = require('mongoose');
 const sensorSchema = new mongoose.Schema({
     sensorType: {
         type: String,
-        default: null
+        required: true
     },
     value: {
-        type: Number,
-        default: null
+        type: mongoose.Schema.Types.Mixed,
+        required: true
     },
+    timestamp: {
+        type: Date,
+        default: Date.now
+    }
 });
 
 module.exports = mongoose.model("Sensor", sensorSchema);

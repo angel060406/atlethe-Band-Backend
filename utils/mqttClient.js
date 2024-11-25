@@ -23,9 +23,9 @@ client.on('connect', () => {
     Object.values(topics).forEach(topic => {
         client.subscribe(topic, (err) => {
             if (err) {
-                console.error(` Error al suscribirse al tema ${topic}:`, err);
+                console.error(`Error al suscribirse al tema ${topic}:`, err);
             } else {
-                console.log(` Suscrito al tema: ${topic}`);
+                console.log(`Suscrito al tema: ${topic}`);
             }
         });
     });
@@ -50,7 +50,7 @@ client.on('message', async (topic, message) => {
             console.log('Enviando temperatura corporal por WebSocket:', tempCorp);
 
             // Guardar en la base de datos
-            await saveSensorData('temperatura', tempCorp);
+            await saveSensorData('temperatura', data);
 
             broadcast(wss, { type: 'temperatura', data: tempCorp });
         } else if (topic === topics.giroscopio) {
@@ -59,27 +59,25 @@ client.on('message', async (topic, message) => {
             const isEncorvado = checkPosture(data.aceleracion);
             const postura = isEncorvado ? 'encorvado' : 'correcta';
 
-            // Guardar estado de la postura en la base de datos
-            await saveSensorData('giroscopio', postura === 'encorvado' ? 1 : 0);
+            // Guardar en la base de datos
+            await saveSensorData('giroscopio', data);
 
             console.log(`Postura detectada: ${postura}`);
             broadcast(wss, { type: 'postura', data: postura });
         } else if (topic === topics.gps) {
             console.log('Enviando datos GPS:', data);
 
-            // Guardar coordenadas GPS como un string en la base de datos
-            const gpsData = ` ${data.latitud},${data.longitud}`;
-            await saveSensorData('gps', gpsData);
+            // Guardar en la base de datos
+            await saveSensorData('gps', data);
 
             broadcast(wss, { type: 'gps', data });
         } else if (topic === topics.ritmoCardiaco) {
-            const ritmo = data.ritmo;
-            console.log('Enviando ritmo cardiaco:', ritmo);
+            console.log('Procesando datos de ritmo cardiaco:', data);
 
-            // Guardar ritmo cardiaco en la base de datos
-            await saveSensorData('ritmoCardiaco', ritmo);
+            // Guardar en la base de datos
+            await saveSensorData('ritmoCardiaco', data);
 
-            broadcast(wss, { type: 'ritmoCardiaco', data: ritmo });
+            broadcast(wss, { type: 'ritmoCardiaco', data });
         }
     } catch (error) {
         console.error('Error al procesar el mensaje JSON:', error);
