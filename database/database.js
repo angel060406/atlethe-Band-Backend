@@ -3,7 +3,11 @@ const mongoose = require("mongoose");
 const MONGODB_URL = process.env.MONGODB_URL;
 
 exports.connect = () => {
-    mongoose.connect(MONGODB_URL)
+    mongoose.connect(MONGODB_URL, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        serverSelectionTimeoutMS: 10000,
+    })
     .then(() => console.log('DB connected'))
     .catch((error) => {
         console.log('DB connection FAILED');

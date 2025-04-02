@@ -62,8 +62,9 @@ exports.loginUser = async (req, res) => {
         );
 
         const options = {
-            expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 3 días
+            expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 día
             httpOnly: true,
+            sameSite: 'lax',
         };
 
         res.cookie('token', token, options);
@@ -77,7 +78,6 @@ exports.loginUser = async (req, res) => {
         res.status(500).send('Error interno del servidor');
     }
 };
-
 
 // Cierre de sesión de usuario
 exports.logout = async (_, res) => {
@@ -93,43 +93,43 @@ exports.logout = async (_, res) => {
 // Devuelve los datos del usuario autenticado
 exports.getProfile = async (req, res) => {
     try {
-      const userId = req.user.id;
-      const user = await User.findById(userId).select('name email');
-  
-      if (!user) {
-        return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
-      }
-  
-      res.status(200).json({ success: true, data: user });
+        const userId = req.user.id;
+        const user = await User.findById(userId).select('name email');
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+        }
+
+        res.status(200).json({ success: true, data: user });
     } catch (error) {
-      console.error('Error al obtener el perfil:', error.message);
-      res.status(500).json({ success: false, message: 'Error interno del servidor' });
+        console.error('Error al obtener el perfil:', error.message);
+        res.status(500).json({ success: false, message: 'Error interno del servidor' });
     }
-  };
-  
+};
+
 // Devuelve todas las actividades
 exports.getActivities = async (req, res) => {
     try {
-      const activities = await Activity.find()
-        .sort({ date: -1 }) // Ordena por fecha descendente
-        .limit(10); // Limita a las últimas 10 actividades
-  
-      if (activities.length === 0) {
-        return res.status(200).json({ success: true, activities: [] });
-      }
-  
-      res.status(200).json({ success: true, activities });
+        const activities = await Activity.find()
+            .sort({ date: -1 })
+            .limit(10);
+
+        if (activities.length === 0) {
+            return res.status(200).json({ success: true, activities: [] });
+        }
+
+        res.status(200).json({ success: true, activities });
     } catch (error) {
-      console.error('Error al obtener actividades:', error.message);
-      res.status(500).json({ success: false, message: 'Error interno del servidor' });
+        console.error('Error al obtener actividades:', error.message);
+        res.status(500).json({ success: false, message: 'Error interno del servidor' });
     }
-  };
-  
+};
+
 // Registrar una actividad manualmente
 exports.registerActivity = async (req, res) => {
     try {
-        const userId = req.user.id; // Obtén el userId del middleware auth
-        const activities = req.body; // Supongamos que el cuerpo de la solicitud es un array de actividades
+        const userId = req.user.id;
+        const activities = req.body;
 
         if (!Array.isArray(activities) || activities.length === 0) {
             return res.status(400).json({
@@ -138,13 +138,11 @@ exports.registerActivity = async (req, res) => {
             });
         }
 
-        // Validar cada actividad y agregar userId
         const activitiesWithUserId = activities.map((activity) => ({
             ...activity,
             userId,
         }));
 
-        // Crear actividades en la base de datos
         await Activity.insertMany(activitiesWithUserId);
 
         res.status(201).json({

@@ -35,18 +35,29 @@ client.on('message', async (topic, message) => {
     try {
         const rawMessage = message.toString();
         console.log(`Mensaje recibido en ${topic}: ${rawMessage}`);
+        let data;
 
-        // Parsear el mensaje JSON
-        const data = JSON.parse(rawMessage);
-
+        // Procesar el mensaje según el tópico
+        if (topic === topics.gps) {
+            // Suponemos que el formato es "lat,lon"
+            const parts = rawMessage.split(',');
+            data = {
+                lat: parseFloat(parts[0]),
+                lon: parseFloat(parts[1])
+            };
+        } else {
+            // Para los otros temas se espera JSON
+            data = JSON.parse(rawMessage);
+        }
+        
         console.log(`Datos procesados en ${topic}:`, data);
 
-        // Obtener la instancia de WebSocket
+        // Obtener la instancia de WebSocket desde la app
         const wss = require('../app').get('wss');
 
         // Procesar mensajes según el tema
         if (topic === topics.temperatura) {
-            const tempCorp = data.temp_corp;
+            const tempCorp = (typeof data === 'object' && data.temp_corp !== undefined) ? data.temp_corp : data;
             console.log('Enviando temperatura corporal por WebSocket:', tempCorp);
 
             // Guardar en la base de datos
@@ -56,7 +67,7 @@ client.on('message', async (topic, message) => {
         } else if (topic === topics.giroscopio) {
             console.log('Procesando datos del giroscopio:', data);
 
-            const isEncorvado = checkPosture(data.aceleracion);
+            const isEncorvado = checkPosture(data);
             const postura = isEncorvado ? 'encorvado' : 'correcta';
 
             // Guardar en la base de datos
@@ -92,7 +103,7 @@ client.on('error', (error) => {
     console.error('Error al conectar con el broker MQTT:', error);
 });
 
-// Función para enviar datos a todos los clientes conectados
+// Función para enviar datos a todos los clientes conectados vía WebSocket
 function broadcast(wss, message) {
     wss.clients.forEach(client => {
         if (client.readyState === client.OPEN) {
@@ -123,7 +134,7 @@ function checkPosture(aceleracion) {
         dentroDeRango(aceleracion.y, posturaCorrecta.y, rangoAceptable.y) &&
         dentroDeRango(aceleracion.z, posturaCorrecta.z, rangoAceptable.z);
 
-    return !esCorrecta; // Devuelve true si no está en rango (encorvado)
+    return !esCorrecta; // Devuelve true si la postura no es correcta (es decir, está encorvado)
 }
 
 module.exports = client;
